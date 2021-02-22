@@ -1,2 +1,2 @@
 # data_mining_hw
-ДЗ по Data Mining
+### Домашние задания по Data Mining
