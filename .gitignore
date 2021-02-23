@@ -232,3 +232,5 @@ cython_debug/
 /.idea/misc.xml
 /.idea/.gitignore
 /.idea/vcs.xml
+/products/
+/products_by_cats/
