@@ -232,3 +232,4 @@ cython_debug/
 /.idea/misc.xml
 /.idea/.gitignore
 /.idea/vcs.xml
+/mongo_example.py
