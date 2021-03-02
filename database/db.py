@@ -18,7 +18,7 @@ class Database:
     def create_post(self, data):
         session = self.maker()
         author = self._get_or_create(
-            session, models.Author, models.Author.url, "url", **data["author"],
+            session, models.Writer, models.Writer.url, "url", **data["author"],
         )
 
         post = self._get_or_create(

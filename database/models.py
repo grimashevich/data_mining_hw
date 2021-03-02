@@ -1,7 +1,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Table
+from sqlalchemy import Column, Integer, String, ForeignKey, Table, DateTime
 
 
 Base = declarative_base()
@@ -30,16 +30,20 @@ tag_post = Table(
 class Post(Base, IdMixin, UrlMixin):
     __tablename__ = "post"
     title = Column(String, nullable=False)
-    author_id = Column(Integer, ForeignKey("author.id"))
-    author = relationship("Author")
+    author_id = Column(Integer, ForeignKey("writer.id"))
+    post_date = Column(DateTime, nullable=False)
+    first_img = Column(String)
+    author = relationship("Writer")
     tags = relationship("Tag", secondary=tag_post)
 
 
-class Author(Base, IdMixin, UrlMixin, NameMixin):
-    __tablename__ = "author"
+class Writer(Base, IdMixin, UrlMixin, NameMixin):
+    __tablename__ = "writer"
     posts = relationship("Post")
 
 
 class Tag(Base, IdMixin, UrlMixin, NameMixin):
     __tablename__ = "tag"
     posts = relationship("Post", secondary=tag_post)
+
+# class Comment

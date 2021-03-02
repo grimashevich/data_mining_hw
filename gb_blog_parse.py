@@ -1,8 +1,11 @@
+# Не доделал комментарии. Пушу потому что выходит срок. Завтра с утра (через 8-10 часов) закачаю полную версию.
+
 import typing
 import requests
 from urllib.parse import urljoin
 import bs4
 from database.db import Database
+from datetime import datetime
 
 
 class GbBlogParse:
@@ -24,7 +27,7 @@ class GbBlogParse:
 
     def __create_task(self, url, callback, tag_list):
         for link in set(
-            urljoin(url, href.attrs.get("href")) for href in tag_list if href.attrs.get("href")
+                urljoin(url, href.attrs.get("href")) for href in tag_list if href.attrs.get("href")
         ):
             if link not in self.done_urls:
                 task = self._get_task(link, callback)
@@ -44,6 +47,11 @@ class GbBlogParse:
             "post_data": {
                 "url": url,
                 "title": soup.find("h1", attrs={"class": "blogpost-title"}).text,
+                "post_date": datetime.fromisoformat(
+                    soup.find("time", attrs={"class": "text-md text-muted m-r-md"}). \
+                attrs.get("datetime")),
+                "first_img": soup.find("div", attrs={"class": "blogpost-content"}). \
+                    find("img").attrs.get("src"),
             },
             "author": {
                 "name": author_name_tag.text,
