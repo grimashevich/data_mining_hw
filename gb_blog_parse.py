@@ -5,15 +5,10 @@ import bs4
 from database.db import Database
 from datetime import datetime
 import time
+from pathlib import Path
 
 
 class GbBlogParse:
-    headers = {
-        "Accept": "application/json",
-        "User-Agent": "Mozilla/5.0 "
-                      "(Macintosh; Intel Mac OS X 10.16; rv:85.0) "
-                      "Gecko/20100101 Firefox/85.0",
-    }
     attempts_count = 5
 
     def __init__(self, start_url, database: Database):
@@ -28,10 +23,10 @@ class GbBlogParse:
         with open(log_path, 'a') as f:
             return f.write(content + '\n')
 
-    def _get_response(self, url, params: dict = None):
+    def _get_response(self, url):
         attempts = 0
         while True:
-            response = requests.get(url, headers=self.headers, params=params)
+            response = requests.get(url)
             if response.status_code == 200:
                 return response
             attempts += 1
@@ -44,7 +39,6 @@ class GbBlogParse:
                 print('Ошибка загрузки страницы, см. логи')
                 exit(1)
             time.sleep(0.5)
-            return response
 
     def _get_soup(self, url):
         resp = self._get_response(url)
