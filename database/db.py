@@ -20,9 +20,11 @@ class Database:
         author = self._get_or_create(
             session, models.Writer, models.Writer.url, "url", **data["author"],
         )
+        session.add(author)
 
         post = self._get_or_create(
-            session, models.Post, models.Post.url, "url", **data["post_data"], author=author
+            session, models.Post, models.Post.url, "url", **data["post_data"],
+            author=author
         )
         post.tags.extend(
             map(
@@ -32,11 +34,28 @@ class Database:
                 data["tags"],
             )
         )
+
+        for i in range(len(data["comments"])):
+            data["comments"][i]["author"] = self._get_or_create(
+                session, models.Writer, models.Writer.url, "url", **data["comments"][i]["author"])
+            session.add(data["comments"][i]["author"])
+
+        post.comments.extend(
+            map(
+                lambda comment_data: self._get_or_create(
+                    session, models.Comment, models.Comment.id, "id",
+                    **comment_data
+                ),
+                data["comments"]
+            )
+
+        )
         session.add(post)
         try:
             session.commit()
         except Exception as exc:
-            # TODO: Отлавливать конкретные ошибки
+            # Не столкнулся ни с одной ошибкой, поэтому пока не понимаю
+            # какие именно ошибки отлавливать
             print(exc)
             session.rollback()
         finally:

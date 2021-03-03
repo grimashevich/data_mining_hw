@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Table, DateTime
 
-
 Base = declarative_base()
 
 
@@ -30,10 +29,11 @@ tag_post = Table(
 class Post(Base, IdMixin, UrlMixin):
     __tablename__ = "post"
     title = Column(String, nullable=False)
-    author_id = Column(Integer, ForeignKey("writer.id"))
+    writer_id = Column(Integer, ForeignKey("writer.id"))
     post_date = Column(DateTime, nullable=False)
     first_img = Column(String)
     author = relationship("Writer")
+    comments = relationship("Comment")
     tags = relationship("Tag", secondary=tag_post)
 
 
@@ -46,4 +46,14 @@ class Tag(Base, IdMixin, UrlMixin, NameMixin):
     __tablename__ = "tag"
     posts = relationship("Post", secondary=tag_post)
 
-# class Comment
+
+class Comment(Base):
+    __tablename__ = "comment"
+    id = Column(Integer, primary_key=True)
+    post_id = Column(Integer, ForeignKey("post.id"))
+    post = relationship("Post")
+    writer_id = Column(Integer, ForeignKey("writer.id"))
+    author = relationship("Writer")
+    text = Column(String, nullable=False)
+    parent_id = Column(Integer, ForeignKey("comment.id"))
+    root_comment_id = Column(Integer, ForeignKey("comment.id"))
