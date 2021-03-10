@@ -14,6 +14,7 @@ NEWSPIDER_MODULE = "gb_parse.spiders"
 
 LOG_ENABLE = True
 LOG_LEVEL = "DEBUG"
+DUPEFILTER_DEBUG = True
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:85.0) Gecko/20100101 Firefox/85.0"
 

@@ -13,7 +13,8 @@ class AutoyoulaSpider(scrapy.Spider):
         "brands": "div.TransportMainFilters_brandsList__2tIkv "
                   ".ColumnItemList_item__32nYI a.blackLink",
         "pagination": "div.Paginator_block__2XAPy a.Paginator_button__u1e7D",
-        "car": "article.SerpSnippet_snippet__3O1t2 .SerpSnippet_titleWrapper__38bZM a.blackLink",
+        "car": ".SerpSnippet_titleWrapper__38bZM a.SerpSnippet_name__3F7Yu",
+        "car_price": "div.AdvertCard_price__3dDCr::text",
         "spec_block": "div.AdvertCard_specs__2FEHc div.AdvertSpecs_row__ljPcX",
         "spec_title": "div.AdvertSpecs_label__2JHnS::text",
         "spec_value": "div.AdvertSpecs_data__xK2Qx::text",
@@ -84,13 +85,12 @@ class AutoyoulaSpider(scrapy.Spider):
         yield from self._get_follow(response, self._css_selectors["brands"], self.brand_parse)
 
     def brand_parse(self, response, *args, **kwargs):
-
-        yield from self._get_follow(response, self._css_selectors["pagination"], self.brand_parse)
-
         yield from self._get_follow(response, self._css_selectors["car"], self.car_parse)
+        yield from self._get_follow(response, self._css_selectors["pagination"], self.brand_parse)
 
     def car_parse(self, response):
         title = response.css(".AdvertCard_advertTitle__1S1Ak::text").extract_first()
+        price = float(response.css(self._css_selectors["car_price"]).extract_first().replace('\u2009', ''))
         spec = {}
         for itm in response.css(self._css_selectors["spec_block"]):
             spec.update(
@@ -121,6 +121,7 @@ class AutoyoulaSpider(scrapy.Spider):
 
         result = {
             "title": title,
+            "price": price,
             "spec": spec,
             "description": description,
             "user_url": user_url,
