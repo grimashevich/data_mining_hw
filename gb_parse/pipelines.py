@@ -9,12 +9,18 @@ from itemadapter import ItemAdapter
 from itemadapter import ItemAdapter
 from pymongo import MongoClient
 
+from gb_parse.items import GbHhruEmployerItem
+
 
 class GbParsePipeline:
     def process_item(self, item, spider):
         client = MongoClient()
         self.db = client["gb_parse_16_02_2021"]
-        self.db[spider.name].insert_one(item)
+        if isinstance(item, GbHhruEmployerItem):
+            collection = spider.name + '_employers'
+        else:
+            collection = spider.name
+        self.db[collection].insert_one(item)
         return item
 
 

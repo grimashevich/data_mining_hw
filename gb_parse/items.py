@@ -23,3 +23,22 @@ class GbAutoYoulaItem(scrapy.Item):
     description = scrapy.Field()
     author = scrapy.Field()
     phone = scrapy.Field()
+
+
+class GbHhruVacancyItem(scrapy.Item):
+    _id = scrapy.Field()
+    url = scrapy.Field()
+    title = scrapy.Field()
+    salary = scrapy.Field()
+    description = scrapy.Field()
+    skills = scrapy.Field()
+    employer_url = scrapy.Field()
+
+
+class GbHhruEmployerItem(scrapy.Item):
+    _id = scrapy.Field()
+    url = scrapy.Field()
+    title = scrapy.Field()
+    site_url = scrapy.Field()
+    service = scrapy.Field()
+    description = scrapy.Field()

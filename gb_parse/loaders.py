@@ -1,8 +1,9 @@
 from scrapy import Selector
 from scrapy.loader import ItemLoader
 from itemloaders.processors import TakeFirst, MapCompose
+from urllib.parse import urljoin
 
-from gb_parse.items import GbAutoYoulaItem
+from gb_parse.items import GbAutoYoulaItem, GbHhruVacancyItem, GbHhruEmployerItem
 from urllib.parse import unquote
 import json
 import base64
@@ -77,3 +78,33 @@ class AutoyoulaLoader(ItemLoader):
     description_out = TakeFirst()
     author_out = list_search_user_id
     phone_out = list_search_phone
+
+
+'''
+HH.RU PARSING
+'''
+
+
+def join_salary(item: list) -> str:
+    return ''.join(item)
+
+
+def join_employer_link(item: list):
+    return urljoin('https://hh.ru/', item[0])
+
+
+class HhruVacancyLoader(ItemLoader):
+    default_item_class = GbHhruVacancyItem
+    url_out = TakeFirst()
+    title_out = TakeFirst()
+    salary_out = join_salary
+    description_out = join_salary
+    employer_url_out = join_employer_link
+
+
+class HhruEmployerLoader(ItemLoader):
+    default_item_class = GbHhruEmployerItem
+    url_out = TakeFirst()
+    site_url_out = TakeFirst()
+    title_out = join_salary
+    description_out = join_salary

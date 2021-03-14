@@ -10,12 +10,6 @@ class AutoyoulaSpider(scrapy.Spider):
     name = "autoyoula"
     allowed_domains = ["auto.youla.ru"]
     start_urls = ["https://auto.youla.ru/"]
-    _css_selectors = {
-        "brands": "div.TransportMainFilters_brandsList__2tIkv "
-                  ".ColumnItemList_item__32nYI a.blackLink",
-        "pagination": "div.Paginator_block__2XAPy a.Paginator_button__u1e7D",
-        "car": ".SerpSnippet_titleWrapper__38bZM a.SerpSnippet_name__3F7Yu",
-    }
 
     _nav_xpath = {
         "brands": "//div[contains(@class, 'ColumnItemList_container')]//"
@@ -49,7 +43,7 @@ class AutoyoulaSpider(scrapy.Spider):
         yield from self._get_follow(response, self._nav_xpath["car"], self.car_parse)
         yield from self._get_follow(response, self._nav_xpath["pagination"], self.brand_parse)
 
-    def car_parse(self, response):
+    def car_parse(self, response, *args, **kwargs):
         loader = AutoyoulaLoader(response=response)
         loader.add_value("url", response.url)
         for key, selector in self._car_xpaths.items():
