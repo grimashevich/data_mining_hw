@@ -8,7 +8,8 @@
 from itemadapter import ItemAdapter
 from itemadapter import ItemAdapter
 from pymongo import MongoClient
-
+from scrapy import Request
+from scrapy.pipelines.images import ImagesPipeline
 from gb_parse.items import GbHhruEmployerItem
 
 
@@ -16,13 +17,35 @@ class GbParsePipeline:
     def process_item(self, item, spider):
         client = MongoClient()
         self.db = client["gb_parse_16_02_2021"]
-        if isinstance(item, GbHhruEmployerItem):
-            collection = spider.name + '_employers'
+        if item.get("collection_name", False):
+            collection = f"{spider.name}_{item['collection_name']}"
+            self.db[collection].insert_one(item["data"])
         else:
-            collection = spider.name
-        self.db[collection].insert_one(item)
+            self.db[spider.name].insert_one(item)
+
         return item
 
+
+class GbImageDownloadPipeline(ImagesPipeline):
+    def get_media_requests(self, item, info):
+        if item["data"].get("display_url"):
+            yield Request(item["data"]["display_url"])
+
+    def item_completed(self, results, item, info):
+        if item["data"].get("display_url"):
+            item["data"]["display_url"] = results[0][1]
+        return item
+
+
+# class GbImageDownloadPipeline(ImagesPipeline):
+#     def get_media_requests(self, item, info):
+#         for url in item.get("photos", []):
+#             yield Request(url)
+#
+#     def item_completed(self, results, item, info):
+#         if item.get("photos"):
+#             item["photos"] = [itm[1] for itm in results]
+#         return item
 
 # class GbParseMongoPipeline:
 #     def __init__(self):
