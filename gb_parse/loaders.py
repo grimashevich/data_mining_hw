@@ -1,9 +1,9 @@
 from scrapy import Selector
 from scrapy.loader import ItemLoader
-from itemloaders.processors import TakeFirst, MapCompose
+from itemloaders.processors import TakeFirst, MapCompose, Join
 from urllib.parse import urljoin
 
-from gb_parse.items import GbAutoYoulaItem, GbHhruVacancyItem, GbHhruEmployerItem
+from gb_parse.items import GbAutoYoulaItem, GbHhruVacancyItem, GbHhruEmployerItem, GbInstaUserItem, GbInstaFollowerItem
 from urllib.parse import unquote
 import json
 import base64
@@ -108,3 +108,12 @@ class HhruEmployerLoader(ItemLoader):
     site_url_out = TakeFirst()
     title_out = join_salary
     description_out = join_salary
+
+
+class GbInstaUserLoader(ItemLoader):
+    default_item_class = GbInstaUserItem
+    default_output_processor = TakeFirst()
+
+class GbInstaFollowerLoader(ItemLoader):
+    default_item_class = GbInstaFollowerItem
+    default_output_processor = TakeFirst()

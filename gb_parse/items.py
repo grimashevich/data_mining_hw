@@ -42,3 +42,16 @@ class GbHhruEmployerItem(scrapy.Item):
     site_url = scrapy.Field()
     service = scrapy.Field()
     description = scrapy.Field()
+
+
+class GbInstaUserItem(scrapy.Item):
+    _id = scrapy.Field()
+    user_id = scrapy.Field()
+    user_name = scrapy.Field()
+
+
+class GbInstaFollowerItem(scrapy.Item):
+    _id = scrapy.Field()
+    insta_user_id = scrapy.Field()
+    follower_id = scrapy.Field()
+

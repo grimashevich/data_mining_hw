@@ -13,6 +13,17 @@ from scrapy.pipelines.images import ImagesPipeline
 from gb_parse.items import GbHhruEmployerItem
 
 
+class GbInstagramPipeline:
+    def process_item(self, item, spider):
+        client = MongoClient()
+        collection = item.__class__.__name__.replace('Item', '')
+        self.db = client["gb_parse_16_02_2021"]
+        if collection == "GbInstaUser" and self.db[collection].find_one({"user_id": item.get("user_id")}):
+            return None
+        self.db[collection].insert_one(item)
+        return item
+
+
 class GbParsePipeline:
     def process_item(self, item, spider):
         client = MongoClient()
@@ -25,16 +36,15 @@ class GbParsePipeline:
 
         return item
 
-
-class GbImageDownloadPipeline(ImagesPipeline):
-    def get_media_requests(self, item, info):
-        if item["data"].get("display_url"):
-            yield Request(item["data"]["display_url"])
-
-    def item_completed(self, results, item, info):
-        if item["data"].get("display_url"):
-            item["data"]["display_url"] = results[0][1]
-        return item
+# class GbImageDownloadPipeline(ImagesPipeline):
+#     def get_media_requests(self, item, info):
+#         if item["data"].get("display_url"):
+#             yield Request(item["data"]["display_url"])
+#
+#     def item_completed(self, results, item, info):
+#         if item["data"].get("display_url"):
+#             item["data"]["display_url"] = results[0][1]
+#         return item
 
 
 # class GbImageDownloadPipeline(ImagesPipeline):

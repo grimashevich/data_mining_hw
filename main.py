@@ -18,8 +18,7 @@ INST_PASSWORD = "#PWD_INSTAGRAM_BROWSER:10:1615966838:AaFQANLJMEq" \
                 "jdR29k6ixRscuV89gREYdzKXcCzLB0GC"
 
 if __name__ == "__main__":
-    # tags = ['navalny', 'scrapy', 'chita']
-    tags = ['navalnyprotests', 'beautifulrussiangirls', 'nnnn_sai', ]
+    ig_users = ['valeriyaar', 'lusha_kristina']
     crawler_settings = Settings()
     crawler_settings.setmodule("gb_parse.settings")
     crawler_proc = CrawlerProcess(settings=crawler_settings)
@@ -31,6 +30,7 @@ if __name__ == "__main__":
         # password=os.getenv("INST_PASSWORD"),
         login=INST_LOGIN,
         password=INST_PASSWORD,
-        tags=tags,
+        # tags=tags,
+        ig_users=ig_users
     )
     crawler_proc.start()
