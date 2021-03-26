@@ -48,6 +48,10 @@ class GbInstaUserItem(scrapy.Item):
     _id = scrapy.Field()
     user_id = scrapy.Field()
     user_name = scrapy.Field()
+    followers = scrapy.Field()
+    followed = scrapy.Field()
+    handshakes = scrapy.Field()     # Пользователи со взаимной подпиской. Сохраняем в БД только их
+    step = scrapy.Field()            # Кол-во шагов от первого, до искомого пользователя
 
 
 class GbInstaFollowerItem(scrapy.Item):

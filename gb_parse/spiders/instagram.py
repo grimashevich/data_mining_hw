@@ -58,10 +58,10 @@ class InstagramSpider(scrapy.Spider):
                     yield response.follow(f"/{ig_user}/", callback=self.user_parse,
                                           cb_kwargs={'ig_user': ig_user})
 
-    def user_parse(self, response, ig_user, *args, **kwargs):
+    def user_parse(self, response, ig_user, step=0, *args, **kwargs):
         jsn = self.js_data_extract(response)
         user_id = next(self.get_json_xpath(jsn, self._json_xpath["user_id"]))
-        yield self.add_user(user_id, ig_user)
+        loader = self.add_user(user_id, ig_user, step)
         referer = response.urljoin(f"/{ig_user}/followers/")
         url = f'https://www.instagram.com/graphql/query/?query_hash=' \
               f'{self._query_cache["followers"]}&variables={{"id":"{user_id}",' \
@@ -71,45 +71,36 @@ class InstagramSpider(scrapy.Spider):
                                        "Referer": referer},
                               callback=self.get_followers,
                               cb_kwargs=dict(ig_user=ig_user, ig_user_id=user_id,
-                                             xcrf=jsn["config"]["csrf_token"])
-                              )
-        url = f'https://www.instagram.com/graphql/query/?query_hash=' \
-              f'{self._query_cache["following"]}&variables={{"id":"{user_id}",' \
-              f'"include_reel":true,"fetch_mutual":false,"first":50}}'
-        yield response.follow(url,
-                              headers={"X-CSRFToken": jsn["config"]["csrf_token"],
-                                       "Referer": referer},
-                              callback=self.get_following,
-                              cb_kwargs=dict(ig_user=ig_user, ig_user_id=user_id,
-                                             xcrf=jsn["config"]["csrf_token"])
+                                             xcrf=jsn["config"]["csrf_token"],
+                                             loader=loader, step=step)
                               )
 
-    def add_user(self, user_id, user_name):
+
+    def add_user(self, user_id, user_name, step):
         loader = GbInstaUserLoader()
         loader.add_value("user_id", user_id)
         loader.add_value("user_name", user_name)
-        return loader.load_item()
+        loader.add_value("step", step)
+        return loader
 
-    def add_follower(self, user_id, follower_id):
-        loader = GbInstaFollowerLoader()
-        loader.add_value("insta_user_id", user_id)
-        loader.add_value("follower_id", follower_id)
-        return loader.load_item()
+    def add_follower(self, follower_id, loader, field):
+        loader.add_value(field, {"user_id": follower_id})
+        return loader
 
     def get_follow_link(self, user_id, end_cursor, q_type='followers', first=50):
         if not self._query_cache.get(q_type, 0):
             return None
         url = f'https://www.instagram.com/graphql/query/?query_hash=' \
               f'{self._query_cache[q_type]}&variables={{"id":"{user_id}",' \
-              f'"include_reel":true,"fetch_mutual":false,"first":{first},' \
+              f'"include_reel":true,"fetch_mutual":true,"first":{first},' \
               f'"after": "{end_cursor}"}}'
         return url
 
-    def get_followers(self, response, ig_user, ig_user_id, xcrf):
+    def get_followers(self, response, ig_user, ig_user_id, xcrf, loader, step):
         jsn = json.loads(response.text)
         for itm in self.get_json_xpath(jsn, "$..edge_followed_by..edges[*].node"):
-            yield self.add_user(itm.get("id"), itm.get("username"))
-            yield self.add_follower(ig_user_id, itm.get("id"))
+            # yield self.add_user(itm.get("id"), itm.get("username"))
+            loader = self.add_follower(itm.get("id"), loader, "followers")
 
         if next(self.get_json_xpath(jsn, "$..edge_followed_by..has_next_page")):
             referer = response.urljoin(f"/{ig_user}/followers/")
@@ -117,14 +108,32 @@ class InstagramSpider(scrapy.Spider):
             url = self.get_follow_link(ig_user_id, end_cursor)
             yield response.follow(url, headers={"X-CSRFToken": xcrf, "Referer": referer},
                                   callback=self.get_followers,
-                                  cb_kwargs=dict(ig_user=ig_user, ig_user_id=ig_user_id, xcrf=xcrf)
+                                  cb_kwargs=dict(ig_user=ig_user, ig_user_id=ig_user_id, xcrf=xcrf,
+                                                 loader=loader, step=step)
+                                  )
+        else:
+            url = f'https://www.instagram.com/graphql/query/?query_hash=' \
+                  f'{self._query_cache["following"]}&variables={{"id":"{ig_user_id}",' \
+                  f'"include_reel":true,"fetch_mutual":true,"first":50}}'
+            yield response.follow(url,
+                                  headers={"X-CSRFToken": xcrf},
+                                  callback=self.get_following,
+                                  cb_kwargs=dict(ig_user=ig_user, ig_user_id=ig_user_id, xcrf=xcrf,
+                                                 loader=loader, step=step)
                                   )
 
-    def get_following(self, response, ig_user, ig_user_id, xcrf):
+    def get_following(self, response, ig_user, ig_user_id, xcrf, loader, step):
         jsn = json.loads(response.text)
         for itm in self.get_json_xpath(jsn, "$..edge_follow..edges[*].node"):
-            yield self.add_user(itm.get("id"), itm.get("username"))
-            yield self.add_follower(itm.get("id"), ig_user_id)
+            # yield self.add_user(itm.get("id"), itm.get("username"))
+            # loader = self.add_follower(itm.get("id"), loader, step, "followed")
+            if not itm.get("is_private") and\
+                    {'user_id': itm.get("id")} in loader._values['followers']:
+                loader = self.add_follower(itm.get("id"), loader, "handshakes")
+                url = response.urljoin(f"/{itm.get('username')}/")
+                yield response.follow(url, callback=self.user_parse,
+                                      cb_kwargs={'ig_user': itm.get('username'),
+                                                 "step": step+1})
 
         if next(self.get_json_xpath(jsn, "$..edge_follow..has_next_page")):
             referer = response.urljoin(f"/{ig_user}/following/")
@@ -132,8 +141,11 @@ class InstagramSpider(scrapy.Spider):
             url = self.get_follow_link(ig_user_id, end_cursor)
             yield response.follow(url, headers={"X-CSRFToken": xcrf, "Referer": referer},
                                   callback=self.get_followers,
-                                  cb_kwargs=dict(ig_user=ig_user, ig_user_id=ig_user_id, xcrf=xcrf)
+                                  cb_kwargs=dict(ig_user=ig_user, ig_user_id=ig_user_id, xcrf=xcrf,
+                                                 loader=loader, step=step)
                                   )
+        else:
+            yield loader.load_item()
 
     def tag_page_parse(self, response, *args, **kwargs):
         if 'json' in str(response.headers['Content-Type']):

@@ -18,8 +18,8 @@ class GbInstagramPipeline:
         client = MongoClient()
         collection = item.__class__.__name__.replace('Item', '')
         self.db = client["gb_parse_16_02_2021"]
-        if collection == "GbInstaUser" and self.db[collection].find_one({"user_id": item.get("user_id")}):
-            return None
+        # if collection == "GbInstaUser" and self.db[collection].find_one({"user_id": item.get("user_id")}):
+        #     return None
         self.db[collection].insert_one(item)
         return item
 

@@ -110,9 +110,16 @@ class HhruEmployerLoader(ItemLoader):
     description_out = join_salary
 
 
+def clear_list(item):
+    return []
+
+
 class GbInstaUserLoader(ItemLoader):
     default_item_class = GbInstaUserItem
-    default_output_processor = TakeFirst()
+    user_id_out = TakeFirst()
+    user_name_out = TakeFirst()
+    followers_out = clear_list
+
 
 class GbInstaFollowerLoader(ItemLoader):
     default_item_class = GbInstaFollowerItem
