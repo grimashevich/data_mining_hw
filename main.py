@@ -11,11 +11,9 @@ from gb_parse.spiders.instagram import InstagramSpider
 # Не устанавливается нигде: Ни в Linux, ни в Windows.
 # Судя по логам, какие-то проблемы в загрузке доп. пакетов
 # Это фейковый instagram аккаунт специально для ДЗ
-INST_LOGIN = 'brianatrumbo604'
-INST_PASSWORD = "#PWD_INSTAGRAM_BROWSER:10:1615966838:AaFQANLJMEq" \
-                "KGX419MK0JDoLZ6TlF1TqPQabk7IaLwnlb8kdSyfMMVm43rfw" \
-                "jBbrIszueG1L0voy6Qtj8JoignmwrBSwECI7NY7mZ0NYj2LSxKGL" \
-                "jdR29k6ixRscuV89gREYdzKXcCzLB0GC"
+INST_LOGIN = 'debwhitworth333'
+INST_PASSWORD = "#PWD_INSTAGRAM_BROWSER:10:1616837702:AStQAHW6mk2THL3kRqv+Y39enX+GK4TdGLtXkGpdyWx2jrNwH" \
+                "gKxvjyGHda/lxiEVArx1I92PfJNw1G0nah8gMtMSMZOTZk5R3HOsbCNoSj9x5Mz47tWTJ3bAq2gt97c7+FM/d/98TjdSpcIIA=="
 
 if __name__ == "__main__":
     ig_users = ['valeriyaar']

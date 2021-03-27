@@ -118,6 +118,7 @@ class GbInstaUserLoader(ItemLoader):
     default_item_class = GbInstaUserItem
     user_id_out = TakeFirst()
     user_name_out = TakeFirst()
+    step_out = TakeFirst()
     followers_out = clear_list
 
 
