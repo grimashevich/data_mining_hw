@@ -49,8 +49,6 @@ def find_handshakes():
 
 
 if __name__ == "__main__":
-    # print(find_handshakes(USERS_TO_SEARCH[1]))
-    # exit(0)
     ig_users = ['arla.nda']
     crawler_settings = Settings()
     crawler_settings.setmodule("gb_parse.settings")
