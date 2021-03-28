@@ -2,8 +2,8 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-
-
+from gb_parse.spiders.instagram import InstagramSpider
+from main import USERS_TO_SEARCH
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 from itemadapter import ItemAdapter
@@ -13,14 +13,19 @@ from scrapy.pipelines.images import ImagesPipeline
 from gb_parse.items import GbHhruEmployerItem
 
 
+
+
+
 class GbInstagramPipeline:
-    def process_item(self, item, spider):
+    def process_item(self, item, spider:InstagramSpider):
         client = MongoClient()
         collection = item.__class__.__name__.replace('Item', '')
         self.db = client["gb_parse_16_02_2021"]
         # if collection == "GbInstaUser" and self.db[collection].find_one({"user_id": item.get("user_id")}):
         #     return None
         self.db[collection].insert_one(item)
+        if item['user_name'] == USERS_TO_SEARCH[1]:
+            spider.crawler.stop()
         return item
 
 

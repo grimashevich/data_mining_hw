@@ -3,6 +3,7 @@ import scrapy
 from jsonpath_ng import jsonpath, parse
 from datetime import datetime
 from random import randint
+from scrapy.exceptions import CloseSpider
 
 from gb_parse.loaders import GbInstaUserLoader, GbInstaFollowerLoader
 
@@ -158,8 +159,9 @@ class InstagramSpider(scrapy.Spider):
             yield loader.load_item()
             if len(self._queue_parse) > 0:
                 self._queue_parse = sorted(self._queue_parse)
-                params = self._queue_parse.pop(0)
-                yield response.follow(params[1], **params[2])
+                for i in range(len(self._queue_parse)):
+                    params = self._queue_parse.pop(0)
+                    yield response.follow(params[1], **params[2])
 
     def tag_page_parse(self, response, *args, **kwargs):
         if 'json' in str(response.headers['Content-Type']):
